@@ -1,16 +1,18 @@
 # Cocktailmaschine on Budget
 
+![image](src\IMG_20260415_222606659_HDR.jpg)
+
 ## Goal
 Goal is to build a very cheep but also good cocktailmachine with a Webinterface where you
 can chosse from predefined Cocktails. Project is based on ESP32 - Dispension is controlled
-by the HC711 which can deliver accurate dispension ~2ml exact.
+by the HC711 which can deliver accurate dispension ~2ml exact. 
 
 ## Hardware
 
 ### For this Cocktail-machine to build you need:
 
 - 8 Pumps (12 V) - they also work with 5V    https://de.aliexpress.com/item/1005005792284115.html    32€
-- Releais-Board (8 Port)                     https://de.aliexpress.com/item/1005003999413945.html    15€
+- Releais-Board (8 Port, ESP32-WROOM)        https://de.aliexpress.com/item/1005003999413945.html    15€
 - HC711 Measurement kit 5kG                  https://de.aliexpress.com/item/1005009135360961.html    6€
 - Power Unit (also USB-Powerbank possible)   https://www.led-universum.de/1000138697                 5€
 
