@@ -1,20 +1,41 @@
 # Cocktailmaschine on Budget
 
 ## Goal
-Goal is to build a very cheep but also good cocktailmachine.
+Goal is to build a very cheep but also good cocktailmachine with a Webinterface where you
+can chosse from predefined Cocktails. Project is based on ESP32 - Dispension is controlled
+by the HC711 which can deliver accurate dispension ~2ml exact.
 
 ## Hardware
 
 ### For this Cocktail-machine to build you need:
 
-- 8 Pumps (12 V) - they also work with 5V    https://de.aliexpress.com/item/1005005792284115.html
-- Releais-Board (8 Port)                     https://de.aliexpress.com/item/1005003999413945.html
-- HC711 Measurement kit                      https://de.aliexpress.com/item/1005009135360961.html
-- Power Unit (also USB-Powerbank possible)   https://www.led-universum.de/1000138697
+- 8 Pumps (12 V) - they also work with 5V    https://de.aliexpress.com/item/1005005792284115.html    32€
+- Releais-Board (8 Port)                     https://de.aliexpress.com/item/1005003999413945.html    15€
+- HC711 Measurement kit 5kG                  https://de.aliexpress.com/item/1005009135360961.html    6€
+- Power Unit (also USB-Powerbank possible)   https://www.led-universum.de/1000138697                 5€
 
+### Additionall parts:
+- Cables (Loudspeaker cables), 
+- USB Flashing Device (once for ESP until we have OTA),   UART-TTL USB CH340G Adapter with 3.3V Support
+- Pipes (8 Meters, 1.5cm),                  
+- some wood (old wardrobe is good to have)  
+- HT-90° Pipe for outlet (or 3D printed)    https://www.bauhaus.info/ht-rohre/ht-bogen/p/13625011
 
-Cables, USB Flashing Device, Pipes, Micro-Switches
+### Extension-Parts:
+- Micro-Switches (If you want more manual control)
 
 ## Tools needed
-For this to build you need also some wood - maybe from old
-Cupbard 
+- Drill 
+- Cutter-Knife
+- Screwdriver
+- Hot-Glue
+- Soldering machine
+
+# Setup
+
+- Clone this repo and open in Visual Studio Code (with PlaformIO installed)
+- Connect your ESP32 Relais Board via USB
+- Find your Serial Port
+- Flash device (Press and Hold EN while Reset)
+- Look at Debug for IP-Address for further updates with OTA-Update
+
