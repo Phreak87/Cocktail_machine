@@ -1,11 +1,15 @@
 # Cocktailmaschine on Budget
 
-![image](src/IMG_20260415_222606659_HDR.jpg)
-
-## Goal
+## Goal:
 Goal is to build a very cheep but also good cocktailmachine with a Webinterface where you
 can chosse from predefined Cocktails. Project is based on ESP32 - Dispension is controlled
-by the HC711 which can deliver accurate dispension ~2ml exact. 
+by the HC711 which can deliver accurate dispension (~2ml deviation with swing-compensation).
+
+## Hint:
+This Project is in a early development-stage. 
+feel free to contribute code or cocktail recipes.
+
+![image](src/IMG_20260415_222606659_HDR.jpg)
 
 ## Hardware
 
@@ -39,5 +43,11 @@ by the HC711 which can deliver accurate dispension ~2ml exact.
 - Connect your ESP32 Relais Board via USB
 - Find your Serial Port
 - Flash device (Press and Hold EN while Reset)
-- Look at Debug for IP-Address for further updates with OTA-Update
+- On first flash ESP will be in AP-Mode.
+- Connect to the Wifi of the Cocktail-machine and connect to your home-wifi!
+- After reboot note the IP-Adress assigned from DHCP (In Logging) (for OTA-Updates)
 
+# Use:
+Open the IP-Adress of your Cocktail machine and setup the pump-pressure value
+and the connected liquids. please do not connect sparkling liquids - it will not work!
+Go to the main-page and select your cocktail. make sure you have a glass on the measurement-unit.
