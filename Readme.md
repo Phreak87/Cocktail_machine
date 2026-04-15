@@ -1,6 +1,6 @@
 # Cocktailmaschine on Budget
 
-![image](src\IMG_20260415_222606659_HDR.jpg)
+![image](src/IMG_20260415_222606659_HDR.jpg)
 
 ## Goal
 Goal is to build a very cheep but also good cocktailmachine with a Webinterface where you
