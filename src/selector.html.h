@@ -1079,7 +1079,8 @@ html, body {
                                     <option value="Minze">Minze</option>
                                     <option value="Soda">Soda</option>
                                     <option value="Cola">Cola</option>
-                                    <option value="Zucker">Zucker</option>
+                                    <option value="Kirschsaft">Kirschsaft</option>
+                                    <option value="Bananensaft">Bananensaft</option>
                                 </select>
                             </div>
                             <div class="form-group">
