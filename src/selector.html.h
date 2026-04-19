@@ -20,21 +20,71 @@ const char selector_html[] PROGMEM = R"rawliteral(
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-body {
+html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background-attachment: fixed;
             color: #333;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
         }
         
         .container { 
             max-width: 1400px; 
             margin: 0 auto; 
-            flex: 1;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            width: 100%;
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 15px;
+        }
+        
+        .header-left h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            border: none;
         }
         
         .panel {
@@ -42,6 +92,11 @@ body {
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+            max-height: calc(100vh - 160px);
         }
         
         .panel h2 {
@@ -99,28 +154,11 @@ body {
             padding: 5px;
         }
         
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
         .header-pump-bar {
             display: flex;
             justify-content: flex-end;
             flex-wrap: wrap;
             gap: 5px;
-        }
-        
-        .header-left h1 {
-            color: var(--primary);
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
         }
         
         .header-left {
@@ -254,11 +292,12 @@ body {
             gap: 8px;
         }
         
-        .main-content {
-            display: flex;
-            flex-direction: column;
+.main-content {
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 20px;
             flex: 1;
+            overflow: hidden;
         }
         
         @media (max-width: 900px) {
@@ -268,13 +307,83 @@ body {
         .panel {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+            max-height: calc(100vh - 160px);
         }
         
+@media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+            .panel {
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            .cocktail-grid {
+                max-height: calc(70vh - 120px);
+                overflow-y: auto;
+            }
+            body {
+                padding: 5px;
+            }
+            .container {
+                overflow: hidden;
+            }
+            header {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .header-top {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        .collapsible {
+            background: var(--light);
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .collapsible-header {
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary);
+            user-select: none;
+        }
+
+        .collapsible-header i {
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible.open .collapsible-header i {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 0 15px 15px;
+        }
+
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+
         .panel h2 {
             color: var(--primary);
             margin-bottom: 15px;
@@ -325,9 +434,11 @@ body {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 15px;
-            max-height: 400px;
+            flex: 1;
             overflow-y: auto;
             padding: 5px;
+            padding-bottom: 20px;
+            align-content: start;
         }
         
         .cocktail-card {
@@ -629,8 +740,38 @@ body {
             cursor: pointer;
         }
         
-        .wifi-list li:hover { background: #ddd; }
-        
+.wifi-list li:hover { background: #ddd; }
+
+        .settings-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            background: var(--light);
+            color: var(--dark);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover { background: #ddd; }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -657,14 +798,11 @@ body {
                         <i class="fas fa-weight-hanging"></i>
                         <span id="weight-display" style="cursor:pointer" title="Klicken zum Tarieren">-- g</span>
                     </div>
-                    <button class="btn btn-primary" id="wifi-btn" onclick="openWiFiModal()">
-                        <i class="fas fa-wifi"></i> <span id="wifi-ssid">--</span>
-                    </button>
                     <button class="btn btn-warning" onclick="openSettingsModal()">
                         <i class="fas fa-cogs"></i> Einstellungen
                     </button>
-                    <button class="btn btn-primary" onclick="openScaleModalFromSettings()">
-                        <i class="fas fa-scale"></i> Waage
+                    <button class="btn btn-primary" id="wifi-btn" onclick="openWiFiModal()">
+                        <i class="fas fa-wifi"></i> <span id="wifi-ssid">--</span>
                     </button>
                 </div>
             </div>
@@ -697,8 +835,13 @@ body {
             </div>
             <img id="modal-img" class="modal-img" src="" alt="">
             
-            <h3><i class="fas fa-list"></i> Zutaten</h3>
-            <div class="ingredient-list" id="modal-ingredients"></div>
+            <div class="collapsible" id="ingredients-collapsible">
+                <div class="collapsible-header" onclick="this.parentElement.classList.toggle('open')">
+                    <span><i class="fas fa-list"></i> Zutaten</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="ingredient-list collapsible-content" id="modal-ingredients"></div>
+            </div>
             
             <h3><i class="fas fa-step-forward"></i> Zubereitung</h3>
             <div class="step-list" id="modal-steps"></div>
@@ -730,30 +873,6 @@ body {
         </div>
     </div>
     
-    <!-- WiFi Modal -->
-    <div id="wifi-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeWiFiModal()">&times;</span>
-            <div class="modal-header">
-                <h2><i class="fas fa-wifi"></i> WLAN Einstellungen</h2>
-            </div>
-            <div class="wifi-form">
-                <div class="status-item" style="margin-bottom: 15px;">
-                    <strong>Aktuell:</strong> <span id="current-wifi">--</span>
-                </div>
-                <button class="btn btn-primary" onclick="scanWiFi()" style="width:100%;">
-                    <i class="fas fa-sync"></i> Netzwerke scannen
-                </button>
-                <ul class="wifi-list" id="wifi-list"></ul>
-                <input type="text" id="wifi-ssid" placeholder="SSID">
-                <input type="password" id="wifi-pass" placeholder="Passwort">
-                <button class="btn btn-success" onclick="saveWiFi()" style="width:100%;">
-                    <i class="fas fa-save"></i> Speichern & Neustarten
-                </button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
@@ -761,102 +880,131 @@ body {
             <div class="modal-header">
                 <h2><i class="fas fa-cogs"></i> Einstellungen</h2>
             </div>
+            <div class="settings-tabs">
+                <button class="tab-btn active" data-tab="pump" onclick="switchTab('pump')">
+                    <i class="fas fa-water"></i> Pumpe
+                </button>
+                <button class="tab-btn" data-tab="scale" onclick="switchTab('scale')">
+                    <i class="fas fa-weight-hanging"></i> Waage
+                </button>
+                <button class="tab-btn" data-tab="wifi" onclick="switchTab('wifi')">
+                    <i class="fas fa-wifi"></i> WLAN
+                </button>
+            </div>
             <div class="settings-form">
-                <h3>Pumpen-Konfiguration</h3>
-                <select id="pump-select" onchange="loadPumpConfig()" style="margin-bottom:15px;">
-                    <option value="0">Alle Pumpen</option>
-                    <option value="1">Pumpe 1</option>
-                    <option value="2">Pumpe 2</option>
-                    <option value="3">Pumpe 3</option>
-                    <option value="4">Pumpe 4</option>
-                    <option value="5">Pumpe 5</option>
-                    <option value="6">Pumpe 6</option>
-                    <option value="7">Pumpe 7</option>
-                    <option value="8">Pumpe 8</option>
-                </select>
-                
-                <div id="pump-config-area">
-                    <div class="pump-config">
-                        <h4>Pumpe <span id="config-pump-num">1</span></h4>
-                        <div class="form-group">
-                            <label>Angeschlossenes Getränk</label>
-                            <select id="pump-drink">
-                                <option value="">-- Nicht belegt --</option>
-                                <option value="Vodka">Vodka</option>
-                                <option value="Rum weiß">Rum weiß</option>
-                                <option value="Dunkler Rum">Dunkler Rum</option>
-                                <option value="Gin">Gin</option>
-                                <option value="Tequila">Tequila</option>
-                                <option value="Whiskey">Whiskey</option>
-                                <option value="Triple Sec">Triple Sec</option>
-                                <option value="Cointreau">Cointreau</option>
-                                <option value="Amaretto">Amaretto</option>
-                                <option value="Kahlua">Kahlua</option>
-                                <option value="Limette">Limette</option>
-                                <option value="Zitronensaft">Zitronensaft</option>
-                                <option value="Orangensaft">Orangensaft</option>
-                                <option value="Ananassaft">Ananassaft</option>
-                                <option value="Cranberrysaft">Cranberrysaft</option>
-                                <option value="Kokosmilch">Kokosmilch</option>
-                                <option value="Ingwersirup">Ingwersirup</option>
-                                <option value="Minze">Minze</option>
-                                <option value="Soda">Soda</option>
-                                <option value="Cola">Cola</option>
-                                <option value="Zucker">Zucker</option>
-                            </select>
+                <div id="tab-pump" class="tab-content active">
+                    <h3>Pumpen-Einstellungen</h3>
+                    <div class="form-group">
+                        <label>Pulsdauer (ms)</label>
+                        <input type="number" id="pump-pulse-duration" value="500">
+                    </div>
+                    <div class="form-group">
+                        <label>Threshold (g)</label>
+                        <input type="number" id="pump-threshold" value="10">
+                    </div>
+                    <button class="btn btn-primary" onclick="savePumpGlobals()" style="width:100%;margin-bottom:20px;">
+                        <i class="fas fa-save"></i> Speichern
+                    </button>
+                    
+                    <h3>Getränk-Zuordnung</h3>
+                    <select id="pump-select" onchange="loadPumpConfig()" style="margin-bottom:15px;">
+                        <option value="0">Alle Pumpen</option>
+                        <option value="1">Pumpe 1</option>
+                        <option value="2">Pumpe 2</option>
+                        <option value="3">Pumpe 3</option>
+                        <option value="4">Pumpe 4</option>
+                        <option value="5">Pumpe 5</option>
+                        <option value="6">Pumpe 6</option>
+                        <option value="7">Pumpe 7</option>
+                        <option value="8">Pumpe 8</option>
+                    </select>
+                    
+                    <div id="pump-config-area">
+                        <div class="pump-config">
+                            <h4>Pumpe <span id="config-pump-num">1</span></h4>
+                            <div class="form-group">
+                                <label>Angeschlossenes Getränk</label>
+                                <select id="pump-drink">
+                                    <option value="">-- Nicht belegt --</option>
+                                    <option value="Vodka">Vodka</option>
+                                    <option value="Rum weiß">Rum weiß</option>
+                                    <option value="Dunkler Rum">Dunkler Rum</option>
+                                    <option value="Gin">Gin</option>
+                                    <option value="Tequila">Tequila</option>
+                                    <option value="Whiskey">Whiskey</option>
+                                    <option value="Triple Sec">Triple Sec</option>
+                                    <option value="Cointreau">Cointreau</option>
+                                    <option value="Amaretto">Amaretto</option>
+                                    <option value="Kahlua">Kahlua</option>
+                                    <option value="Limette">Limette</option>
+                                    <option value="Zitronensaft">Zitronensaft</option>
+                                    <option value="Orangensaft">Orangensaft</option>
+                                    <option value="Ananassaft">Ananassaft</option>
+                                    <option value="Cranberrysaft">Cranberrysaft</option>
+                                    <option value="Kokosmilch">Kokosmilch</option>
+                                    <option value="Ingwersirup">Ingwersirup</option>
+                                    <option value="Minze">Minze</option>
+                                    <option value="Soda">Soda</option>
+                                    <option value="Cola">Cola</option>
+                                    <option value="Zucker">Zucker</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>g/ml Faktor</label>
+                                <input type="number" id="pump-rate" step="0.01" value="1.00">
+                            </div>
+                            <button class="btn btn-success" onclick="savePumpConfig()">
+                                <i class="fas fa-save"></i> Speichern
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label>g/ml Faktor</label>
-                            <input type="number" id="pump-rate" step="0.01" value="1.00">
-                        </div>
-                        <div class="form-group">
-                            <label>Ansaugzeit (ms)</label>
-                            <input type="number" id="pump-prime" value="2000">
-                        </div>
-                        <button class="btn btn-success" onclick="savePumpConfig()">
-                            <i class="fas fa-save"></i> Speichern
-                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Scale Modal -->
-    <div id="scale-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeScaleModal()">&times;</span>
-            <div class="modal-header">
-                <h2><i class="fas fa-weight-hanging"></i> Waage Einstellungen</h2>
-            </div>
-            <div class="settings-form">
-                <h3>Kalibrierung</h3>
-                <div class="form-group">
-                    <button class="btn btn-warning" onclick="tareScale()" style="width:100%;margin-bottom:10px;">
-                        <i class="fas fa-scale"></i> Tarieren (leer)
+                
+                <div id="tab-scale" class="tab-content">
+                    <h3>Waage Kalibrierung</h3>
+                    <div class="form-group">
+                        <button class="btn btn-warning" onclick="tareScale()" style="width:100%;margin-bottom:10px;">
+                            <i class="fas fa-scale"></i> Tarieren (leer)
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Kalibriergewicht (g)</label>
+                        <input type="number" id="calibrate-weight" value="1000">
+                        <button class="btn btn-success" onclick="calibrateScale()" style="width:100%;margin-top:10px;">
+                            <i class="fas fa-check"></i> Kalibrieren
+                        </button>
+                        <p id="calibrate-result" style="margin-top:10px;font-size:0.85rem;color:#666;"></p>
+                    </div>
+                    
+                    <h3>Grenzwerte</h3>
+                    <div class="form-group">
+                        <label>Schwellwert (g)</label>
+                        <input type="number" id="weight-threshold" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Schwingdauer (ms)</label>
+                        <input type="number" id="swing-time" value="100">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveLimits()" style="width:100%;">
+                        <i class="fas fa-save"></i> Speichern
                     </button>
-                </div>
-                <div class="form-group">
-                    <label>Kalibriergewicht (g)</label>
-                    <input type="number" id="calibrate-weight" value="1000">
-                    <button class="btn btn-success" onclick="calibrateScale()" style="width:100%;margin-top:10px;">
-                        <i class="fas fa-check"></i> Kalibrieren
-                    </button>
-                    <p id="calibrate-result" style="margin-top:10px;font-size:0.85rem;color:#666;"></p>
                 </div>
                 
-                <h3>Grenzwerte</h3>
-                <div class="form-group">
-                    <label>Schwellwert (g)</label>
-                    <input type="number" id="weight-threshold" value="10">
+                <div id="tab-wifi" class="tab-content">
+                    <h3>WLAN Einstellungen</h3>
+                    <div class="status-item" style="margin-bottom:15px;">
+                        <strong>Aktuell:</strong> <span id="current-wifi">--</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="scanWiFi()" style="width:100%;">
+                        <i class="fas fa-sync"></i> Netzwerke scannen
+                    </button>
+                    <ul class="wifi-list" id="wifi-list"></ul>
+                    <input type="text" id="wifi-ssid" placeholder="SSID">
+                    <input type="password" id="wifi-pass" placeholder="Passwort">
+                    <button class="btn btn-success" onclick="saveWiFi()" style="width:100%;margin-top:15px;">
+                        <i class="fas fa-save"></i> Speichern & Neustarten
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label>Schwingdauer (ms)</label>
-                    <input type="number" id="swing-time" value="100">
-                </div>
-                <button class="btn btn-primary" onclick="saveLimits()" style="width:100%;">
-                    <i class="fas fa-save"></i> Speichern
-                </button>
             </div>
         </div>
     </div>
@@ -912,8 +1060,10 @@ body {
         
         function handleWSMessage(data) {
             if (data.weight !== undefined) {
-                var w = parseFloat(data.weightG);
-                document.getElementById('weight-display').textContent = Math.round(w) + ' g';
+                var w = parseFloat(data.weight);
+                if (!isNaN(w)) {
+                    document.getElementById('weight-display').textContent = Math.round(w) + ' g';
+                }
             }
             
             if (data.wifi !== undefined) {
@@ -1161,20 +1311,22 @@ body {
         }
         
 function openWiFiModal() {
-            var m = document.getElementById('wifi-modal');
-            m.classList.add('active');
-            m.style.display = 'grid';
-            m.style.placeItems = 'center';
+            document.getElementById('settings-modal').classList.add('active');
+            document.getElementById('settings-modal').style.display = 'grid';
+            document.getElementById('settings-modal').style.placeItems = 'center';
+            switchTab('wifi');
+        }
+        
+        function closeWiFiModal() {
+            var m = document.getElementById('settings-modal');
+            m.classList.remove('active');
+            m.style.display = '';
         }
         
         function closeWiFiModal() {
             var m = document.getElementById('wifi-modal');
             m.classList.remove('active');
             m.style.display = '';
-        }
-        
-        function closeWiFiModal() {
-            document.getElementById('wifi-modal').style.display = 'none';
         }
         
         function scanWiFi() {
@@ -1223,29 +1375,24 @@ function openWiFiModal() {
             });
         }
         
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
+            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+            document.querySelector('.tab-btn[data-tab="' + tab + '"]').classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
         function openSettingsModal() {
             var m = document.getElementById('settings-modal');
             m.classList.add('active');
             m.style.display = 'grid';
             m.style.placeItems = 'center';
+            switchTab('pump');
             loadPumpConfig();
         }
         
 function closeSettingsModal() {
             var m = document.getElementById('settings-modal');
-            m.classList.remove('active');
-            m.style.display = '';
-        }
-        
-        function openScaleModalFromSettings() {
-            var sm = document.getElementById('scale-modal');
-            sm.classList.add('active');
-            sm.style.display = 'grid';
-            sm.style.placeItems = 'center';
-        }
-        
-        function closeScaleModal() {
-            var m = document.getElementById('scale-modal');
             m.classList.remove('active');
             m.style.display = '';
         }
@@ -1259,10 +1406,25 @@ function closeSettingsModal() {
             document.getElementById('pump-config-area').style.display = 'block';
             document.getElementById('config-pump-num').textContent = idx;
             
-            var pump = settings.pumps[idx - 1] || { drink: '', rate: 10, prime: 2000 };
+            var pump = settings.pumps[idx - 1] || { drink: '', rate: 10 };
             document.getElementById('pump-drink').value = pump.drink || '';
             document.getElementById('pump-rate').value = pump.rate || 10;
-            document.getElementById('pump-prime').value = pump.prime || 2000;
+        }
+        
+        function savePumpGlobals() {
+            var pulseDuration = parseInt(document.getElementById('pump-pulse-duration').value) || 500;
+            var threshold = parseInt(document.getElementById('pump-threshold').value) || 10;
+            
+            fetch('/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pumpPulseDuration: pulseDuration,
+                    pumpThreshold: threshold
+                })
+            }).then(function() {
+                alert('Einstellungen gespeichert!');
+            });
         }
         
         function savePumpConfig() {
@@ -1271,8 +1433,7 @@ function closeSettingsModal() {
             
             var pump = {
                 drink: document.getElementById('pump-drink').value,
-                rate: parseInt(document.getElementById('pump-rate').value) || 10,
-                prime: parseInt(document.getElementById('pump-prime').value) || 2000
+                rate: parseInt(document.getElementById('pump-rate').value) || 10
             };
             
             settings.pumps[idx - 1] = pump;

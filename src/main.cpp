@@ -292,7 +292,8 @@ void calibrateScale(int referenceGram) {
 
 float getWeightGram() {
   float val = scale.get_units(5);
-  return val > 0 ? val : 0;
+  if (isnan(val) || val < 0) return 0;
+  return val;
 }
 
 int findPortByDrink(String drinkName) {
@@ -320,9 +321,12 @@ String getWiFiStatusJson() {
 }
 
 String getScaleJson() {
+  float w = getWeightGram();
+  if (w < 0 || w > 100000) w = 0;
+  
   JsonDocument doc;
-  doc["weight"] = getWeightGram() / 1000.0;
-  doc["weightG"] = getWeightGram();
+  doc["weight"] = w / 1000.0;
+  doc["weightG"] = w;
 
   String json;
   serializeJson(doc, json);
@@ -365,8 +369,11 @@ bool isAnyPumpActive() {
 }
 
 void sendBroadcastStatus() {
+  float w = getWeightGram();
+  if (w < 0 || w > 100000) w = 0;
+  
   JsonDocument doc;
-  doc["weight"] = getWeightGram() / 1000.0;
+  doc["weight"] = w / 1000.0;
   
   if (!isAnyPumpActive()) {
     doc["wifi"]["mode"] = WiFi.getMode() == WIFI_STA ? "STA" : "AP";

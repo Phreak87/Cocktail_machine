@@ -12,15 +12,17 @@ const char settings_json[] PROGMEM = R"rawliteral(
     "reference": 1000,
     "referenceRaw": 0
   },
+  "pumpPulseDuration": 500,
+  "pumpThreshold": 10,
   "pumps": [
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 },
-    { "drink": "", "rate": 10, "prime": 2000 }
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 },
+    { "drink": "", "rate": 10 }
   ]
 }
 )rawliteral";
