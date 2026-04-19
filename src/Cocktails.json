@@ -1,4 +1,3 @@
-const char cocktails_json[] PROGMEM = R"rawliteral(
 [
   {
     "id": 1,
@@ -143,4 +142,4 @@ const char cocktails_json[] PROGMEM = R"rawliteral(
       { "text": "Mit Soda auffüllen", "drink": "Soda", "ml": 150, "manual": false }
     ]
   }
-])rawliteral";
+]

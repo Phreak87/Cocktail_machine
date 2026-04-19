@@ -357,6 +357,13 @@ String getSettingsJson() {
   return json;
 }
 
+bool isAnyPumpActive() {
+  for (int i = 0; i < 8; i++) {
+    if (globalSettings.pumps[i].active) return true;
+  }
+  return false;
+}
+
 void sendBroadcastStatus() {
   JsonDocument doc;
   doc["weight"] = getWeightGram() / 1000.0;
