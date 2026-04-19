@@ -360,19 +360,20 @@ String getSettingsJson() {
 void sendBroadcastStatus() {
   JsonDocument doc;
   doc["weight"] = getWeightGram() / 1000.0;
-  doc["weightG"] = getWeightGram();
   
-  doc["wifi"]["mode"] = WiFi.getMode() == WIFI_STA ? "STA" : "AP";
-  doc["wifi"]["connected"] = WiFi.status() == WL_CONNECTED;
-  if (WiFi.status() == WL_CONNECTED) {
-    doc["wifi"]["ssid"] = WiFi.SSID();
-    doc["wifi"]["rssi"] = WiFi.RSSI();
-  }
+  if (!isAnyPumpActive()) {
+    doc["wifi"]["mode"] = WiFi.getMode() == WIFI_STA ? "STA" : "AP";
+    doc["wifi"]["connected"] = WiFi.status() == WL_CONNECTED;
+    if (WiFi.status() == WL_CONNECTED) {
+      doc["wifi"]["ssid"] = WiFi.SSID();
+      doc["wifi"]["rssi"] = WiFi.RSSI();
+    }
 
-  JsonArray pumps = doc["pumps"].to<JsonArray>();
-  for (int i = 0; i < 8; i++) {
-    JsonObject p = pumps.add<JsonObject>();
-    p["active"] = globalSettings.pumps[i].active;
+    JsonArray pumps = doc["pumps"].to<JsonArray>();
+    for (int i = 0; i < 8; i++) {
+      JsonObject p = pumps.add<JsonObject>();
+      p["active"] = globalSettings.pumps[i].active;
+    }
   }
 
   String json;
@@ -404,6 +405,8 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsE
     String msgType = doc["type"].as<String>();
 
     if (msgType == "status") {
+      if (isAnyPumpActive()) return;
+      
       String status = getWiFiStatusJson();
       client->text(status.c_str());
       String settingsJson = getSettingsJson();
@@ -438,6 +441,12 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsE
       globalSettings.pumps[port].active = true;
       drainPump(port);
       globalSettings.pumps[port].active = false;
+    }
+    else if (msgType == "start") {
+      int port = doc["port"];
+      Serial.printf("Start pump %d\n", port);
+      digitalWrite(RelaisPins[port], HIGH);
+      globalSettings.pumps[port].active = true;
     }
     else if (msgType == "stop") {
       int port = doc["port"];

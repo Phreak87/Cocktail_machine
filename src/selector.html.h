@@ -98,13 +98,14 @@ const char selector_html[] PROGMEM = R"rawliteral(
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 0.7rem;
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
+            background: #e0e0e0;
+            color: #333;
             margin: 2px;
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
+            border: 1px solid #999;
         }
         
         .pump-bubble i {
@@ -115,13 +116,14 @@ const char selector_html[] PROGMEM = R"rawliteral(
         .pump-bubble.active {
             background: var(--success);
             color: #fff;
+            border-color: var(--success);
         }
         
         .pump-bubble .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #888;
+            background: #666;
         }
         
         .pump-bubble.active .dot {
@@ -168,9 +170,6 @@ const char selector_html[] PROGMEM = R"rawliteral(
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
-            padding: 10px;
-            border-radius: 10px;
-            background: rgba(44, 62, 80, 0.6);
         }
         
         .pump-bar-row {
@@ -652,13 +651,13 @@ const char selector_html[] PROGMEM = R"rawliteral(
             
             <div class="modal-footer">
                 <div class="size-buttons">
-                    <button type="button" class="btn size-btn" onclick="selectSize(200)" title="Klein">
+                    <button type="button" class="btn size-btn" onclick="selectSize(200, 0)" title="Klein">
                         <i class="fas fa-glass-whiskey"></i> 200
                     </button>
-                    <button type="button" class="btn size-btn" onclick="selectSize(300)" title="Mittel">
+                    <button type="button" class="btn size-btn" onclick="selectSize(300, 1)" title="Mittel">
                         <i class="fas fa-glass-martini"></i> 300
                     </button>
-                    <button type="button" class="btn size-btn active" onclick="selectSize(500)" title="Groß">
+                    <button type="button" class="btn size-btn active" onclick="selectSize(500, 2)" title="Groß">
                         <i class="fas fa-glass-whiskey"></i> 500
                     </button>
                 </div>
@@ -955,7 +954,7 @@ const char selector_html[] PROGMEM = R"rawliteral(
                     el.onmousedown = function() {
                         el.classList.add('active');
                         if (ws && ws.readyState === WebSocket.OPEN) {
-                            ws.send(JSON.stringify({ type: 'dispense', port: port, ms: 50 }));
+                            ws.send(JSON.stringify({ type: 'start', port: port }));
                         }
                     };
                     el.onmouseup = function() {
@@ -1027,11 +1026,11 @@ const char selector_html[] PROGMEM = R"rawliteral(
             selectedCocktail = null;
         }
         
-        function selectSize(size) {
+        function selectSize(size, index) {
             selectedSize = size;
-            document.querySelectorAll('.size-btn').forEach(function(btn) {
+            document.querySelectorAll('.size-btn').forEach(function(btn, i) {
                 btn.classList.remove('active');
-                if (btn.textContent === size + 'ml') btn.classList.add('active');
+                if (i === index) btn.classList.add('active');
             });
         }
         
