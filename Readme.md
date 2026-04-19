@@ -9,7 +9,7 @@ by the HC711 which can deliver accurate dispension (~2ml deviation with swing-co
 This Project is in a early development-stage.
 feel free to contribute code or cocktail recipes.
 
-![image](src/IMG_20260415_222606659_HDR.jpg)
+![image](src/Machine.jpg)
 Web-Interface (Desktop and Mobile) View:
 ![image](src/Interface.png)
 ![image](src/Mobile_View.png)
