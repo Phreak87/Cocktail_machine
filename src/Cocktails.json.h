@@ -21,19 +21,17 @@ const char cocktails_json[] PROGMEM = R"rawliteral(
   },
   {
     "id": 2,
-    "name": "Margarita",
-    "type": "alcoholic",
+    "name": "Ki-Ba",
+    "type": "non-alcoholic",
     "baseMl": 200,
-    "image": "https://github.com/Phreak87/Cocktail_machine/blob/main/src/Margarita.jpg?raw=true",
+    "image": "https://github.com/Phreak87/Cocktail_machine/blob/main/src/Kiba.jpg?raw=true",
     "ingredients": [
-      { "name": "Tequila", "ml": 50 },
-      { "name": "Triple Sec", "ml": 25 },
-      { "name": "Limette", "ml": 15 }
+      { "name": "Kirschsaft", "ml": 100 },
+      { "name": "Bananensaft", "ml": 100 }
     ],
     "steps": [
-      { "text": "Tequila und Triple Sec mixen", "drink": "Tequila", "ml": 50, "manual": false },
-      { "text": "Limette hinzufügen", "drink": "Limette", "ml": 15, "manual": false },
-      { "text": "Mit Soda auffüllen", "drink": "Soda", "ml": 50, "manual": false }
+      { "text": "Kirschsaft und Bananensaft mixen", "drink": "Kirschsaft", "ml": 100, "manual": false },
+      { "text": "Mit Banane garnieren", "drink": "Bananensaft", "ml": 0, "manual": true }
     ]
   },
   {

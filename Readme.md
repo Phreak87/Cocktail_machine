@@ -25,13 +25,13 @@ Dialogs for Cocktail and Settings:
 - Releais-Board (8 Port, ESP32-WROOM)        https://de.aliexpress.com/item/1005003999413945.html    15€
 - HC711 Measurement kit 5kG                  https://de.aliexpress.com/item/1005009135360961.html    6€
 - Power Unit (also USB-Powerbank possible)   https://www.led-universum.de/1000138697                 5€
+- HT-90° Pipe for outlet (or 3D printed)    https://www.bauhaus.info/ht-rohre/ht-bogen/p/13625011    5€
+- Pipes (8 Meters, 0.8cm)                                                                            15€                                                  
 
 ### Additionall parts:
 - Cables (Loudspeaker cables), 
-- USB Flashing Device (once for ESP until we have OTA),   UART-TTL USB CH340G Adapter with 3.3V Support
-- Pipes (8 Meters, 1.5cm),                  
+- USB Flashing Device (once for ESP until we have OTA),   UART-TTL USB CH340G Adapter with 3.3V Support                 
 - some wood (old wardrobe is good to have)  
-- HT-90° Pipe for outlet (or 3D printed)    https://www.bauhaus.info/ht-rohre/ht-bogen/p/13625011
 
 ### Extension-Parts:
 - Micro-Switches (If you want manual pump control (recommended))
@@ -59,3 +59,7 @@ because the cocktail-images are not stored locally.
 Open the IP-Adress of your Cocktail machine and setup the pump-pressure value
 and the connected liquids. please do not connect sparkling liquids - it will not work!
 Go to the main-page and select your cocktail. make sure you have a glass on the measurement-unit.
+
+
+# Thanks:
+Thank you *Breme* for your strong support building this machine.

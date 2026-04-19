@@ -772,6 +772,123 @@ html, body {
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        .calibration-step {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .step-circle.active {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .step-circle.done {
+            background: var(--success);
+            color: white;
+        }
+        
+        .step-line {
+            flex: 1;
+            max-width: 30px;
+            height: 3px;
+            background: #ddd;
+        }
+        
+        .step-content h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .step-content p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .info-bubble {
+            display: none;
+            position: absolute;
+            z-index: 100;
+            background: var(--dark);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            max-width: 250px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-top: -10px;
+        }
+        
+        .info-bubble::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            border-width: 0 8px 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent var(--dark) transparent;
+        }
+        
+        .info-bubble.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .info-bubble i.fa-times {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .info-bubble i.fa-times:hover {
+            opacity: 1;
+        }
+        
+        .info-icon {
+            color: var(--secondary);
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .info-icon:hover {
+            color: var(--primary);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
         .loading {
             text-align: center;
             padding: 40px;
@@ -895,12 +1012,28 @@ html, body {
                 <div id="tab-pump" class="tab-content active">
                     <h3>Pumpen-Einstellungen</h3>
                     <div class="form-group">
-                        <label>Pulsdauer (ms)</label>
+                        <label>
+                            Pulsdauer (ms)
+                            <i class="fas fa-info-circle info-icon" onclick="showInfoBubble(this, 'info-pulse')"></i>
+                        </label>
                         <input type="number" id="pump-pulse-duration" value="500">
+                        <div class="info-bubble" id="info-pulse">
+                            <i class="fas fa-times" onclick="closeInfoBubble('info-pulse')"></i>
+                            <strong>Pulsdauer</strong><br>
+                            Wie lange eine Pumpe pro ml aktiviert wird. Typisch: 10ms/ml. Höhere Werte = mehr Durchfluss.
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Threshold (g)</label>
+                        <label>
+                            Threshold (g)
+                            <i class="fas fa-info-circle info-icon" onclick="showInfoBubble(this, 'info-pumpthreshold')"></i>
+                        </label>
                         <input type="number" id="pump-threshold" value="10">
+                        <div class="info-bubble" id="info-pumpthreshold">
+                            <i class="fas fa-times" onclick="closeInfoBubble('info-pumpthreshold')"></i>
+                            <strong>Threshold</strong><br>
+                            Maximale Abweichung in Gramm, die beim Abmessen toleriert wird. Typisch: 5-10g.
+                        </div>
                     </div>
                     <button class="btn btn-primary" onclick="savePumpGlobals()" style="width:100%;margin-bottom:20px;">
                         <i class="fas fa-save"></i> Speichern
@@ -950,8 +1083,16 @@ html, body {
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>g/ml Faktor</label>
+                                <label>
+                                    g/ml Faktor
+                                    <i class="fas fa-info-circle info-icon" onclick="showInfoBubble(this, 'info-rate')"></i>
+                                </label>
                                 <input type="number" id="pump-rate" step="0.01" value="1.00">
+                                <div class="info-bubble" id="info-rate">
+                                    <i class="fas fa-times" onclick="closeInfoBubble('info-rate')"></i>
+                                    <strong>g/ml Faktor</strong><br>
+                                    Korrekturfaktor für die Durchflussmenge. 1.0 = Standard. Größer = mehr pro ml ausgegeben.
+                                </div>
                             </div>
                             <button class="btn btn-success" onclick="savePumpConfig()">
                                 <i class="fas fa-save"></i> Speichern
@@ -962,28 +1103,91 @@ html, body {
                 
                 <div id="tab-scale" class="tab-content">
                     <h3>Waage Kalibrierung</h3>
-                    <div class="form-group">
-                        <button class="btn btn-warning" onclick="tareScale()" style="width:100%;margin-bottom:10px;">
-                            <i class="fas fa-scale"></i> Tarieren (leer)
-                        </button>
+                    
+                    <div id="calibration-wizard">
+                        <div class="calibration-step" data-step="1">
+                            <div class="step-indicator">
+                                <div class="step-circle active">1</div>
+                                <div class="step-line"></div>
+                                <div class="step-circle">2</div>
+                                <div class="step-line"></div>
+                                <div class="step-circle">3</div>
+                            </div>
+                            <div class="step-content">
+                                <h4><i class="fas fa-hand-paper"></i> Schritt 1: Leere Waage</h4>
+                                <p>Stellen Sie sicher, dass die Waage leer ist und nichts darauf liegt.</p>
+                                <button class="btn btn-primary" onclick="calibrationStep(2)" style="width:100%;margin-top:15px;">
+                                    <i class="fas fa-arrow-right"></i> Weiter
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="calibration-step" data-step="2" style="display:none;">
+                            <div class="step-indicator">
+                                <div class="step-circle done">1</div>
+                                <div class="step-line"></div>
+                                <div class="step-circle active">2</div>
+                                <div class="step-line"></div>
+                                <div class="step-circle">3</div>
+                            </div>
+                            <div class="step-content">
+                                <h4><i class="fas fa-weight-hanging"></i> Schritt 2: 1kg Referenzgewicht</h4>
+                                <p>Platzieren Sie jetzt ein 1kg Gewicht auf der Waage.</p>
+                                <p style="text-align:center;font-size:1.5rem;font-weight:bold;margin:20px 0;">
+                                    <i class="fas fa-weight-hanging"></i> 1000g
+                                </p>
+                                <button class="btn btn-success" onclick="calibrationStep(3)" style="width:100%;margin-top:15px;">
+                                    <i class="fas fa-check"></i> Kalibrieren
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="calibration-step" data-step="3" style="display:none;">
+                            <div class="step-indicator">
+                                <div class="step-circle done">1</div>
+                                <div class="step-line"></div>
+                                <div class="step-circle done">2</div>
+                                <div class="step-line"></div>
+                                <div class="step-circle done">3</div>
+                            </div>
+                            <div class="step-content">
+                                <h4><i class="fas fa-check-circle"></i> Kalibrierung abgeschlossen</h4>
+                                <p id="calibration-result" style="margin:15px 0;padding:15px;background:#d4edda;border-radius:8px;color:#155724;">
+                                    <i class="fas fa-check"></i> Waage wurde erfolgreich kalibriert!
+                                </p>
+                                <button class="btn btn-primary" onclick="resetCalibration()" style="width:100%;">
+                                    <i class="fas fa-redo"></i> Erneut kalibrieren
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Kalibriergewicht (g)</label>
-                        <input type="number" id="calibrate-weight" value="1000">
-                        <button class="btn btn-success" onclick="calibrateScale()" style="width:100%;margin-top:10px;">
-                            <i class="fas fa-check"></i> Kalibrieren
-                        </button>
-                        <p id="calibrate-result" style="margin-top:10px;font-size:0.85rem;color:#666;"></p>
-                    </div>
+                    
+                    <hr style="margin:25px 0;border:none;border-top:1px solid #ddd;">
                     
                     <h3>Grenzwerte</h3>
                     <div class="form-group">
-                        <label>Schwellwert (g)</label>
+                        <label>
+                            Schwellwert (g)
+                            <i class="fas fa-info-circle info-icon" onclick="showInfoBubble(this, 'info-threshold')"></i>
+                        </label>
                         <input type="number" id="weight-threshold" value="10">
+                        <div class="info-bubble" id="info-threshold">
+                            <i class="fas fa-times" onclick="closeInfoBubble('info-threshold')"></i>
+                            <strong>Schwellwert</strong><br>
+                            Mindestgewicht in Gramm, das die Waage erkennen muss, um einen Cocktail zu starten. Empfohlen: 10g
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Schwingdauer (ms)</label>
+                        <label>
+                            Schwingdauer (ms)
+                            <i class="fas fa-info-circle info-icon" onclick="showInfoBubble(this, 'info-swing')"></i>
+                        </label>
                         <input type="number" id="swing-time" value="100">
+                        <div class="info-bubble" id="info-swing">
+                            <i class="fas fa-times" onclick="closeInfoBubble('info-swing')"></i>
+                            <strong>Schwingdauer</strong><br>
+                            Wartezeit nach dem Einschenken, damit die Waage nicht durch Schwingungen falsche Werte misst.
+                        </div>
                     </div>
                     <button class="btn btn-primary" onclick="saveLimits()" style="width:100%;">
                         <i class="fas fa-save"></i> Speichern
@@ -1479,20 +1683,49 @@ function closeSettingsModal() {
                 });
         }
         
+        function calibrationStep(step) {
+            document.querySelectorAll('.calibration-step').forEach(function(el) {
+                el.style.display = 'none';
+            });
+            document.querySelector('.calibration-step[data-step="' + step + '"]').style.display = 'block';
+            
+            if (step === 3) {
+                calibrateScale();
+            }
+        }
+        
+        function resetCalibration() {
+            calibrationStep(1);
+        }
+        
+        function showInfoBubble(el, bubbleId) {
+            var bubble = document.getElementById(bubbleId);
+            document.querySelectorAll('.info-bubble').forEach(function(b) {
+                b.classList.remove('show');
+            });
+            bubble.classList.add('show');
+            bubble.style.top = '30px';
+            bubble.style.left = '10px';
+        }
+        
+        function closeInfoBubble(bubbleId) {
+            document.getElementById(bubbleId).classList.remove('show');
+        }
+        
         function calibrateScale() {
-            var refWeight = parseInt(document.getElementById('calibrate-weight').value) || 1000;
             fetch('/calibrate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reference: refWeight })
+                body: JSON.stringify({ reference: 1000 })
             })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    document.getElementById('calibrate-result').textContent = 
-                        'Kalibriert: ' + data.reference + 'g, Faktor: ' + data.factor.toFixed(6);
+                    var result = document.getElementById('calibration-result');
+                    result.innerHTML = '<i class="fas fa-check"></i> Waage kalibriert mit 1000g, Faktor: ' + data.factor.toFixed(6);
                 })
                 .catch(function(e) {
                     console.error('Calibrate failed:', e);
+                    document.getElementById('calibration-result').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Fehler bei Kalibrierung';
                 });
         }
         
