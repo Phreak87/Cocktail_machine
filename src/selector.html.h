@@ -1758,6 +1758,375 @@ function closeSettingsModal() {
             }
         };
         
+        var wizardActive = false;
+        var wizardQueue = [];
+        var wizardStep = 0;
+        var wizardCancelled = false;
+        
+        function startWizard(cocktail, size) {
+            if (!cocktail) return;
+            
+            var base = cocktail.baseMl || 250;
+            var factor = size / base;
+            
+            wizardQueue = cocktail.steps.map(function(s) {
+                var gram = s.ml ? Math.round(s.ml * factor) : 30;
+                return {
+                    drink: s.drink,
+                    gram: gram,
+                    text: s.text,
+                    manual: s.manual || false
+                };
+            });
+            
+            wizardStep = 0;
+            wizardCancelled = false;
+            wizardActive = true;
+            
+            document.getElementById('wizard-title').innerHTML = '<i class="fas fa-cocktail"></i> ' + cocktail.name;
+            document.getElementById('wizard-cocktail').textContent = cocktail.name;
+            document.getElementById('wizard-step-total').textContent = wizardQueue.length;
+            
+            document.getElementById('wizard-step-container').style.display = 'block';
+            document.getElementById('wizard-complete').style.display = 'none';
+            
+            showWizardStep();
+            document.getElementById('wizard-modal').classList.add('active');
+        }
+        
+        function showWizardStep() {
+            if (wizardStep >= wizardQueue.length) {
+                showWizardComplete();
+                return;
+            }
+            
+            var step = wizardQueue[wizardStep];
+            var drink = step.drink || 'Unbekannt';
+            var port = findPortByDrink(drink);
+            
+            document.getElementById('wizard-step-num').textContent = wizardStep + 1;
+            document.getElementById('wizard-drink-name').innerHTML = '<i class="fas fa-glass"></i> ' + drink;
+            document.getElementById('wizard-instruction').textContent = step.text;
+            document.getElementById('wizard-amount').innerHTML = '<i class="fas fa-scale"></i> ' + step.gram + 'g';
+            
+            document.getElementById('wizard-status').style.display = 'none';
+            document.getElementById('wizard-error').style.display = 'none';
+            
+            var nextBtn = document.getElementById('wizard-next-btn');
+            var manualBtn = document.getElementById('wizard-manual-btn');
+            var cancelBtn = document.getElementById('wizard-cancel-btn');
+            
+            if (port >= 0 && !step.manual) {
+                nextBtn.style.display = 'none';
+                manualBtn.style.display = 'none';
+                cancelBtn.disabled = false;
+                
+                setTimeout(function() {
+                    if (!wizardCancelled && wizardActive) {
+                        wizardNextStep();
+                    }
+                }, 1500);
+            } else if (step.manual) {
+                nextBtn.style.display = 'none';
+                manualBtn.style.display = 'flex';
+                manualBtn.disabled = false;
+                cancelBtn.disabled = false;
+            } else {
+                nextBtn.style.display = 'flex';
+                manualBtn.style.display = 'flex';
+                nextBtn.innerHTML = '<i class="fas fa-question-circle"></i> Nicht gefunden - manuell?';
+                cancelBtn.disabled = false;
+            }
+            
+            document.querySelectorAll('.step-circle')[0].classList.add('active');
+            document.querySelectorAll('.step-circle')[1].classList.remove('active');
+        }
+        
+        function wizardNextStep() {
+            if (wizardCancelled || wizardStep >= wizardQueue.length) return;
+            
+            var step = wizardQueue[wizardStep];
+            var drink = step.drink;
+            var port = findPortByDrink(drink);
+            
+            if (port >= 0) {
+                document.getElementById('wizard-status').style.display = 'block';
+                document.getElementById('wizard-status-text').textContent = 'Pumpen... ' + step.gram + 'g';
+                document.getElementById('wizard-next-btn').disabled = true;
+                document.getElementById('wizard-cancel-btn').disabled = true;
+                
+                ws.send(JSON.stringify({
+                    type: 'makeStep',
+                    drink: drink,
+                    gram: step.gram
+                }));
+            } else {
+                document.getElementById('wizard-error').style.display = 'block';
+                document.getElementById('wizard-error-text').textContent = 'Getraenk "' + drink + '" nicht gefunden. Bitte manuell einfüllen und weiter klicken.';
+                document.getElementById('wizard-manual-btn').style.display = 'flex';
+                document.getElementById('wizard-next-btn').style.display = 'none';
+            }
+        }
+        
+        function wizardManualContinue() {
+            wizardStep++;
+            showWizardStep();
+        }
+        
+        function wizardCancel() {
+            wizardCancelled = true;
+            wizardActive = false;
+            document.getElementById('wizard-modal').classList.remove('active');
+        }
+        
+        function closeWizardModal() {
+            wizardCancelled = true;
+            wizardActive = false;
+            document.getElementById('wizard-modal').classList.remove('active');
+            document.getElementById('cocktail-modal').classList.remove('active');
+        }
+        
+        function showWizardComplete() {
+            document.getElementById('wizard-step-container').style.display = 'none';
+            document.getElementById('wizard-complete').style.display = 'block';
+            wizardActive = false;
+        }
+        
+        function handleWizardMessage(data) {
+            if (!wizardActive || wizardCancelled) return;
+            
+            if (data.gram !== undefined) {
+                var weightText = Math.round(data.gram) + ' g';
+                document.getElementById('wizard-weight-value').textContent = weightText;
+            }
+            
+            if (data.status === 'done') {
+                document.getElementById('wizard-status').style.display = 'block';
+                document.getElementById('wizard-status-text').textContent = 'Fertig! ' + Math.round(data.gram) + 'g ausgegeben.';
+                
+                setTimeout(function() {
+                    wizardStep++;
+                    showWizardStep();
+                }, 1000);
+            } else if (data.status === 'error') {
+                document.getElementById('wizard-error').style.display = 'block';
+                document.getElementById('wizard-error-text').textContent = data.error || 'Fehler';
+                document.getElementById('wizard-next-btn').disabled = false;
+                document.getElementById('wizard-cancel-btn').disabled = false;
+            } else if (data.status === 'notFound') {
+                document.getElementById('wizard-error').style.display = 'block';
+                document.getElementById('wizard-error-text').textContent = 'Getraenk "' + data.drink + '" nicht gefunden. Bitte manuell einfüllen.';
+                document.getElementById('wizard-manual-btn').style.display = 'flex';
+                document.getElementById('wizard-next-btn').style.display = 'none';
+            }
+        }
+        
+        var newCocktailData = { name: '', type: 'alcoholic', baseMl: 250, image: '', ingredients: [], steps: [] };
+        var testPumpActive = false;
+        
+        function openNewCocktailModal() {
+            newCocktailData = { name: '', type: 'alcoholic', baseMl: 250, image: '', ingredients: [], steps: [] };
+            document.getElementById('new-cocktail-name').value = '';
+            document.getElementById('new-cocktail-type').value = 'alcoholic';
+            document.getElementById('new-cocktail-base').value = '250';
+            document.getElementById('new-cocktail-image').value = '';
+            document.getElementById('steps-list').innerHTML = '';
+            document.getElementById('new-cocktail-modal').classList.add('active');
+        }
+        
+        function proceedToSteps() {
+            var name = document.getElementById('new-cocktail-name').value.trim();
+            var type = document.getElementById('new-cocktail-type').value;
+            var baseMl = parseInt(document.getElementById('new-cocktail-base').value) || 250;
+            var image = document.getElementById('new-cocktail-image').value.trim();
+            
+            if (!name) {
+                document.getElementById('new-cocktail-name').focus();
+                return;
+            }
+            
+            newCocktailData.name = name;
+            newCocktailData.type = type;
+            newCocktailData.baseMl = baseMl;
+            newCocktailData.image = image;
+            
+            newCocktailData.ingredients = [];
+            newCocktailData.steps = [];
+            
+            renderStepsList();
+            openStepModal();
+        }
+        
+        function openStepModal() {
+            document.getElementById('add-drink-modal').classList.add('active');
+            document.getElementById('new-cocktail-modal').classList.remove('active');
+            
+            document.getElementById('add-step-type').value = 'drink';
+            document.getElementById('add-drink-name').value = 'Vodka';
+            document.getElementById('add-drink-ml').value = '300';
+            document.getElementById('add-garnish-name').value = '';
+            updateStepTypeUI();
+            
+            document.getElementById('pump-test-weight').textContent = '-- g';
+            document.getElementById('pump-test-area').style.display = 'none';
+        }
+        
+        function goBackToCocktailModal() {
+            document.getElementById('add-drink-modal').classList.remove('active');
+            document.getElementById('new-cocktail-modal').classList.add('active');
+        }
+        
+        function updateStepTypeUI() {
+            var stepType = document.getElementById('add-step-type').value;
+            if (stepType === 'drink') {
+                document.getElementById('drink-select-area').style.display = 'block';
+                document.getElementById('garnish-input-area').style.display = 'none';
+            } else {
+                document.getElementById('drink-select-area').style.display = 'none';
+                document.getElementById('garnish-input-area').style.display = 'block';
+            }
+        }
+        
+        function renderStepsList() {
+            var container = document.getElementById('steps-list');
+            container.innerHTML = '';
+            
+            newCocktailData.steps.forEach(function(step, index) {
+                var item = document.createElement('div');
+                item.className = 'step-item';
+                
+                var iconClass = step.stepType === 'garnish' ? 'garnish' : 'drink';
+                var iconSymbol = step.stepType === 'garnish' ? '<i class="fas fa-wine-bottle"></i>' : '<i class="fas fa-glass"></i>';
+                var label = step.stepType === 'garnish' ? step.text : step.drink + ' (' + step.ml + 'ml)';
+                
+                item.innerHTML = '<div class="step-item-info"><span class="step-icon ' + iconClass + '">' + iconSymbol + '</span><span>' + label + '</span></div><button class="delete-step" onclick="removeStep(' + index + ')"><i class="fas fa-trash"></i></button>';
+                
+                container.appendChild(item);
+            });
+        }
+        
+        function removeStep(index) {
+            newCocktailData.steps.splice(index, 1);
+            newCocktailData.ingredients.splice(index, 1);
+            renderStepsList();
+        }
+        
+        function testPump() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            var drinkName = document.getElementById('add-drink-name').value;
+            var port = findPortByDrink(drinkName);
+            
+            if (port < 0) {
+                alert('Getränk nicht an Pumpe angeschlossen');
+                return;
+            }
+            
+            var ml = parseInt(document.getElementById('add-drink-ml').value) || 30;
+            testPumpActive = true;
+            document.getElementById('pump-test-area').style.display = 'block';
+            ws.send(JSON.stringify({ type: 'makeStep', drink: drinkName, gram: ml }));
+        }
+        
+        function stopPump() {
+            testPumpActive = false;
+        }
+        
+        function saveNewDrink() {
+            var stepType = document.getElementById('add-step-type').value;
+            
+            if (stepType === 'drink') {
+                var name = document.getElementById('add-drink-name').value;
+                var ml = parseInt(document.getElementById('add-drink-ml').value) || 300;
+                
+                var ingredient = {
+                    name: name,
+                    ml: ml
+                };
+                newCocktailData.ingredients.push(ingredient);
+                
+                var step = {
+                    stepType: 'drink',
+                    drink: name,
+                    ml: ml,
+                    text: name + ' hinzufuegen'
+                };
+                newCocktailData.steps.push(step);
+                
+                document.getElementById('add-drink-modal').classList.remove('active');
+                document.getElementById('new-cocktail-modal').classList.add('active');
+                renderStepsList();
+            } else {
+                var garnishName = document.getElementById('add-garnish-name').value.trim();
+                if (!garnishName) {
+                    document.getElementById('add-garnish-name').focus();
+                    return;
+                }
+                
+                var step = {
+                    stepType: 'garnish',
+                    text: garnishName
+                };
+                newCocktailData.steps.push(step);
+                
+                document.getElementById('add-drink-modal').classList.remove('active');
+                document.getElementById('new-cocktail-modal').classList.add('active');
+                renderStepsList();
+            }
+        }
+        
+        function saveCocktail() {
+            if (!newCocktailData.name) {
+                newCocktailData.name = document.getElementById('new-cocktail-name').value.trim();
+            }
+            if (!newCocktailData.name) {
+                document.getElementById('new-cocktail-name').focus();
+                return;
+            }
+            fetch('/cocktails', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newCocktailData)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === 'saved') {
+                    loadCocktails();
+                    document.getElementById('new-cocktail-modal').classList.remove('active');
+                    alert('Cocktail gespeichert!');
+                } else {
+                    alert('Fehler: ' + data.error);
+                }
+            })
+            .catch(function(e) {
+                console.error('Save cocktail failed:', e);
+                alert('Speichern fehlgeschlagen');
+            });
+        }
+        
+        function deleteCocktail(name) {
+            if (!confirm('Cocktail "' + name + '" wirklich loeschen?')) return;
+            
+            fetch('/cocktail/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === 'deleted') {
+                    loadCocktails();
+                    alert('Cocktail geloescht!');
+                } else {
+                    alert('Fehler: ' + (data.error || data.status));
+                }
+            })
+            .catch(function(e) {
+                console.error('Delete cocktail failed:', e);
+                alert('Loeschen fehlgeschlagen');
+            });
+        }
+        
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
